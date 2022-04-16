@@ -1,0 +1,18 @@
+require_relative '../lib/Loginator'
+
+class A
+    extend Loginator
+
+    def add(a, b)
+        a + b
+    end
+
+    def sub(a, b)
+        a - b
+    end
+    logify_me
+end
+
+a = A.new
+a.add(3, 5)
+a.sub(7, 4)

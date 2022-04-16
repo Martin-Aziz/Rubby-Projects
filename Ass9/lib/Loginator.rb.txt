@@ -1,0 +1,13 @@
+module Loginator
+    def logify_me()
+        self.instance_methods(false).each do |m|
+            alias_method "old_#{m}", m
+            define_method(m) do |*args|
+                puts "Method #{m}(#{args.join ", "}) called"
+                result = send("old_#{m}", *args)
+                puts "Result: #{result}"
+                result
+            end
+        end
+    end
+end
