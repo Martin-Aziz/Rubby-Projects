@@ -1,0 +1,82 @@
+require_relative "../lib/crypter.rb"
+
+hashed_password, wordlist_file, transform_file = ARGV.filter { |arg| !(/^-/ === arg) }
+
+verbose = ARGV.include?("-v")
+
+def measure_time
+	start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+	yield
+	end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+	elapsed = end_time - start_time
+	puts "runtime: %.2fs" % elapsed
+	elapsed
+end
+
+found_password = false
+
+measure_time do
+	puts "Testing against wordlist #{wordlist_file}"
+	File.open(wordlist_file, "r") do |word_file|
+		word_file.each_line do |line|
+			word = line.chomp
+			print "%-50s" % word, "\r" if verbose
+			if test_password(word, hashed_password)
+				puts "Found Password: #{word}"
+				found_password = true
+				break
+			end
+		end
+	end
+end
+puts
+
+if found_password
+	exit
+end
+
+measure_time do
+	puts "Testing against wordlist #{wordlist_file} with transformation from #{transform_file}"
+	File.open(wordlist_file, "r") do |word_file|
+		transforms = File.read(transform_file).each_line.to_a.map { |l| l.chomp }
+		word_file.each_line do |word_line|
+			transforms.each do |transform|
+				regex, replacement = /^\/(?<regex>.*?)\/(?<flags>\w*?) (?<replacement>.*)$/.match(transform).values_at(:regex, :replacement)
+				transformed = word_line.chomp.gsub(Regexp.new(regex), replacement)
+				print "%-50s" % transformed, "\r" if verbose
+				if test_password(transformed, hashed_password)
+					puts "Found Password: #{transformed}"
+					found_password = true
+					break
+				end
+			end
+			if found_password
+				break
+			end
+		end
+	end
+end
+puts
+
+if found_password
+	exit
+end
+
+(1..).each do |length|
+	puts "Brute Force Attack Length #{length}"
+	measure_time do
+		(" ".."~").to_a.repeated_permutation(length).each do |permutation|
+			password = permutation.join("")
+			print "%-50s" % password, "\r" if verbose
+			if test_password(password, hashed_password)
+				puts "Found Password: #{password}"
+				found_password = true
+				break
+			end
+		end
+	end
+	puts
+	if found_password
+		exit
+	end
+end

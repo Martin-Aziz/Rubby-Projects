@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+require "openssl"
+require "base64"
+require "securerandom"
+
+$n, $r, $p, $length = 2**14, 8, 1, 32
+
+##
+# Erzeugt zu einem gegebenen Passwort einen gehashten Eintrag,
+# der z.B. in der Nutzerdatenbank gespeicher werden könnte
+# @param [String] password das Password, das gehasht werden soll
+def hash_password(password)
+    # Generate a salt
+    salt = SecureRandom.random_bytes(16)
+
+    # Generate full hash
+    "%s|%s" % [ Base64.strict_encode64(salt), hash($n, $r, $p, $length, salt, password) ]
+end
+
+##
+# Testet, ob das angegebene Klartext-Passwort zum Hash passt
+# @param [String] password Klartext-Passwort
+# @param [String] hash_password Passwort-Hash, wie von hash_password erzeugt
+def test_password(password, hashed_password)
+    salt, stored_hash = hashed_password.split('|')
+    input_hash = hash($n, $r, $p, $length, Base64.strict_decode64(salt), password)        
+    stored_hash === input_hash
+end
+
+##
+# Interne Funktion, um mit scrypt ein hash zu berechnen
+def hash(n, r, p, length, salt, password)
+    hash = OpenSSL::KDF.scrypt(password, 
+                    salt: salt, 
+                    N: n.to_i, 
+                    r: r.to_i, 
+                    p: p.to_i, 
+                    length: length.to_i)
+    Base64.strict_encode64(hash)
+end
