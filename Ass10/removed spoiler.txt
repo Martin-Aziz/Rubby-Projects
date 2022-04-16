@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main(int argc, char const *argv[]) {
+    srandom(time(NULL));
+    int num_to_guess = (int)(random() * 100.0 / (RAND_MAX + 1.0)) + 1;
+    int tries = 0;
+    
+    printf("Try to guess the number\n");
+
+    while (1) {
+        printf("Enter the num > ");
+        char num_chosen_str[50];
+        fgets(num_chosen_str, 50, stdin);
+        int num_chosen = atoi(num_chosen_str);
+        tries++;
+
+        if (num_chosen > num_to_guess) {
+            printf("The number is smaller\n\n");
+        } else if (num_chosen < num_to_guess) {
+            printf("The number is greater\n\n");
+        } else if (num_chosen == num_to_guess) {
+            break;
+        }
+    }
+
+    printf("Nice! you took %d tries\n", tries);
+
+    return 0;
+}
