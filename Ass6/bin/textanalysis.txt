@@ -1,0 +1,49 @@
+require_relative "../lib/wordlist.rb"
+
+filename, stdout_file = ARGV
+
+if stdout_file
+	$stdout.reopen(stdout_file, "w")
+end
+
+file = File.open(filename, "r").read
+
+puts "Analyse der datei '#{filename[/(?<=^|\/|\\)[^\\\/]*$/]}'"
+puts
+
+wordlist = Wordlist.new
+
+words = file.scan(/(?:(?!\d)\p{L})+/u) { |match| wordlist << match }
+
+puts "Wörter insgesamt:        % 6i" % [wordlist.count_words]
+puts "Unterschiedliche wörter: % 6i" % [wordlist.length]
+puts
+
+puts "┏━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓"
+puts "┃ Rang ┃ Anzahl ┃ Häufigkeit (%) ┃ Wort          ┃"
+puts "┡━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩"
+word_rank = 0
+wordlist.each_word.first(10).each do |(word, count, frequency)|
+	puts "│ % 4i │ % 6i │ % 13.2f%% │ %-13s │" % [word_rank += 1, count, frequency * 100, word]
+end
+puts "├──────┼────────┼────────────────┼───────────────┤"
+rest_count, rest_frequency = wordlist.each_word[10..].reduce([0,0]) { |sum, (word, count, frequency)| 
+	sum[0] += count
+	sum[1] += frequency
+	sum
+}
+puts "│  ... │ % 6i │ % 13.2f%% │ %-13s │ " % [rest_count, rest_frequency * 100, "Rest"]
+puts "└──────┴────────┴────────────────┴───────────────┘"
+
+puts
+puts "Buchstaben insgesamt:    % 6i" % [wordlist.count_letters]
+puts
+
+puts "┏━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓"
+puts "┃ Rang ┃ Anzahl ┃ Häufigkeit (%) ┃ Buchstabe     ┃"
+puts "┡━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩"
+letter_rank = 0
+wordlist.each_letter -> (letter, count, frequency) do
+	puts "│ % 4i │ % 6i │ % 13.2f%% │ %-13s │" % [letter_rank += 1, count, frequency * 100, letter]
+end
+puts "└──────┴────────┴─────────────

@@ -1,0 +1,74 @@
+class Counter
+	@counts
+	def initialize
+		@counts = {}
+	end
+	def <<(item)
+		@counts[item] ||= 0
+		@counts[item] += 1
+	end
+	def length
+		@counts.length
+	end
+	def count
+		@counts.values.reduce(0) { |sum, x| sum + x }
+	end
+	def [](item)
+		@counts[item] || 0
+	end
+	def frequency(item)
+		self[item].to_f / count
+	end
+	def each
+		if block_given?
+			@counts.to_a.sort { |a, b| b[1] <=> a[1] }.each { |k,v| yield(k, v, frequency(k)) }
+		else
+			@counts.to_a.sort { |a, b| b[1] <=> a[1] }.map { |k,v| [k, v, frequency(k)] }
+		end
+	end
+
+end
+
+
+class Wordlist
+	@word_counts
+	@letter_counts
+	def initialize
+		@word_counts = Counter.new
+		@letter_counts = Counter.new
+	end
+	def <<(word)
+		word = word.downcase
+		@word_counts << word
+		word.each_char { |l| @letter_counts << l }
+	end
+	def count_words
+		@word_counts.count
+	end
+	def count_letters
+		@letter_counts.count
+	end
+	def length
+		@word_counts.length
+	end
+	def [](word)
+		@word_counts[word]
+	end
+	def frequency(word)
+		@word_counts.frequency(word)
+	end
+	def each_word
+		if block_given?
+			@word_counts.each { |*args| yield(*args) }
+		else
+			@word_counts.each
+		end
+	end
+	def each_letter(proc = nil)
+		if proc
+			@letter_counts.each { |*args| proc.call(*args) }
+		else
+			@letter_counts.each
+		end
+	end
+end
