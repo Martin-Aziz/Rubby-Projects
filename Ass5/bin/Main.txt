@@ -1,0 +1,5 @@
+require_relative '../lib/vektor'
+
+v1 = Vektor.new(1,2,3)
+v2 = Vektor.new(4, 5, 7)
+v3 = Vektor.new(16, 20, 28)

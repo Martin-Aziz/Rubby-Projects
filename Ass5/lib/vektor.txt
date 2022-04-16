@@ -1,0 +1,147 @@
+class Vektor
+    attr_accessor :x, :y, :z
+
+    # Converts the object in String
+    # @return [String] returns a string with all attributes
+    def to_s
+        "x(#{@x.class}): #{@x}, y(#{@y.class}): #{@y}, z(#{@z.class}): #{@z}"
+    end
+
+    # Converts the obj into an array
+    # @return [Array<numeric>] returns an array with obj attributes as items [x,y,z]
+    def to_a; [x, y, z]; end
+
+    # Converts the obj so that it can be printed
+    # @return [String] returns a string with all attributes with {} around
+    def inspect; "{#{to_s}}"; end
+
+    # Object constructor
+    # @param x [Numeric] 1st value of the Vektor
+    # @param y [Numeric] 2nd value of the Vektor
+    # @param z [Numeric] 3rd value of the Vektor
+    # @return [Object<Vektor>] returns the object
+    # @example use of constructor
+    #   Vektor.new # => (x:0, y: 0; z:0)
+    #   Vektor.new(5,3,9) # => (x:5, y: 3; z:9)
+    def initialize(x = 0, y = 0, z = 0)
+        @x, @y, @z = x, y, z
+    end
+
+    # Compares 2 Vektor Objects
+    # @param other [Vektor] the 2nd Vektor to compare
+    # @return [Bool] returns a bool indicating if the 2 Vektors are equal
+    def ==(other)
+        @x == other.x && @y == other.y && @z == other.z
+    end
+
+    # Sums 2 Vektors
+    # @param other [Vektor] 2nd Vektor to add
+    # @return [Vektor] returns the sum as a new Vektor
+    def add_vektor(other)
+        Vektor.new(@x + other.x, @y + other.y, @z + other.z)
+    end
+
+    # Sum operator for the Vektor object
+    # @param other [Vektor] 2nd Vektor to add
+    # @return [Vektor] returns the sum as a new Vektor
+    # @raise [ArgumentError] raise if the var isn't a Vektor type
+    def +(other)
+        case other
+            when Vektor then add_vektor(other)
+            else raise ArgumentError.new("You can't sum the vektor with #{other.class}")
+        end
+    end
+
+    # Subtracts 2 vectors
+    # @param other [Vektor] 2nd Vektor to subract
+    # @return [Vektor] returns the subtraction as a new Vektor
+    def sub_vektor(other)
+        Vektor.new(@x - other.x, @y - other.y, @z - other.z)
+    end
+
+    # Subtractions operator for the Vektor object
+    # @param other [Vektor] 2nd Vektor to subract
+    # @return [Vektor] returns the subtraction as a new Vektor
+    # @raise [ArgumentError] raise if the var isn't a Vektor type
+    def -(other)
+        case other
+            when Vektor then sub_vektor(other)
+            else raise ArgumentError.new("You can't subtract the vektor with #{other.class}")
+        end
+    end
+
+    # Multiply 2 Vektors
+    # @param other [Vektor] 2nd Vektor to multiply
+    # @return [Numeric] returns the scalar product of the multiplication
+    def multi_vektor(other)
+        nx = @x * other.x
+        ny = @y * other.y
+        nz = @z * other.z
+
+        nx + ny + nz
+    end
+
+    # Multiply the Vektor with a scalar
+    # @param scalar [Numeric] the scalar to multiply
+    # @return [Vektor] returns a new Vektor product
+    def multi_scalar(scalar)
+        Vektor.new(@x*scalar, @y*scalar, @z*scalar)
+    end
+
+    # Multiplication operator for the Vektor object
+    # @param other [Vektor|Numeric] 2nd Vektor or Numeric to multiply
+    # @return [Numeric|Vektor] returns the result of the multiplication, it can be a Vektor or a Scalar
+    # @raise [ArgumentError] raise if the var isn't a Vektor or Numeric type
+    def *(other)
+        case other
+            when Vektor then multi_vektor(other)
+            when Numeric then multi_scalar(other)
+            else raise ArgumentError.new("You can't multiply the vektor with #{other.class}")
+        end
+    end
+
+    # Cross operator for the Vektor object
+    # @param other [Vektor] 2nd Vektor
+    # @return [Numeric|Vektor] returns the result of the cross operation
+    def %(other)
+        x = @y * other.z - other.y * @z
+        y = @z * other.x - other.z * @x
+        z = @x * other.y - other.x * @y
+
+        Vektor.new(x, y, z)
+    end
+
+    # Magnitude of the Vektor
+    # @return [Numeric] returns the magnitude of the Vektor
+    def mag
+        Math.sqrt(@x**2 + @y**2 + @z**2)
+    end
+
+    # Normalized magnitude of the Vektor
+    # @return [Numeric] returns the magnitude of the Vektor normalized
+    # @raise [ArgumentError] raise if the magnietude of the Vektor is 0
+    def normalize
+        raise ArgumentError.new("The 0 vector can not be normalized") if self.mag == 0
+        self * (1 / mag)
+    end
+
+    # Check if the collinearity of 2 Vektors
+    # @return [Bool] returns if the 2 Vektors are collinear
+    def collinear? (other)
+        vs = [self, other].sort { |a, b| a.x <=> b.x }
+        scal = vs[1].mag / vs[0].mag
+        vs[1] == vs[0] * scal
+    end
+
+end
+
+
+class Integer
+	alias_method :interger_mult, :*
+	def *(other)
+        case other
+            when Vektor then other * self
+            else interger_mult(other)
+		end
+	end
+end
