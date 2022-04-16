@@ -1,0 +1,21 @@
+require "chunky_png"
+
+text_file_path, png_file_path = ARGV
+
+File.open(text_file_path, "r") do |file|
+	numbers = file.read.gsub(/[\n\r]/, "")
+
+	WIDTH = 1000
+	HEIGHT = 1000
+
+	raise "The file is not big enough" if numbers.length < WIDTH * HEIGHT
+	png = ChunkyPNG::Image.new(WIDTH, HEIGHT)
+	WIDTH.times do |x|
+		HEIGHT.times do |y|
+			i = x + y * WIDTH
+			value = (numbers[i].to_f / 9 * 255).to_i
+			png[x, y] = ChunkyPNG::Color.rgb(value, value, value)
+		end
+	end
+	png.save(png_file_path)
+end
