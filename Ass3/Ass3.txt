@@ -1,0 +1,57 @@
+def winner(a, b)
+	if a == b
+		return 0
+	end
+	case a
+		when :p
+			b == :r ? 1 : -1
+		when :r
+			b == :s ? 1 : -1
+		when :s
+			b == :p ? 1 : -1
+	end
+end
+
+def emoji(a)
+	case a
+		when :s
+			"✂"
+		when :r
+			"👊"
+		when :p
+			"✋"
+	end
+end
+
+player_score = 0
+computer_score = 0
+
+for i in 1..3
+	print "Round #{i}: What is your choice? ([r]rock, [p]aper, [s]cissors) "
+	player_choice = gets.chomp.to_sym
+	computer_choice = [:s, :r, :p][rand(0..2)]
+	res = winner(player_choice, computer_choice)
+	player_score += [res, 0].max
+	computer_score += [-res, 0].max
+	print "👤 #{emoji(player_choice)} : #{emoji(computer_choice)} 💻, "
+	case res
+		when -1
+			print "computer wins"
+		when 0
+			print "draw"
+		when 1
+			print "you win"
+	end
+	puts ", 👤 #{player_score}:#{computer_score} 💻"
+	puts
+end
+
+case player_score
+	when (computer_score + 1)..;
+		print "You won"
+	when ..(computer_score - 1)
+		print "The computer won"
+	else
+		print "It is a draw"
+end
+puts ", 👤 #{player_score}:#{computer_score} 💻"
